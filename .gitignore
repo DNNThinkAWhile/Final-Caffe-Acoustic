@@ -1,0 +1,5 @@
+*.solverstate
+*.caffemodel
+*_lmdb/
+*.swp
+MLDS_HW1_RELEASE_v1
