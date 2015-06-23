@@ -1,5 +1,9 @@
-
 name: "Acoustic"
+input: "data"
+input_dim: 256
+input_dim: 1
+input_dim: 1
+input_dim: 108
 layer {
   name: "data"
   type: "Data"
@@ -14,23 +18,6 @@ layer {
   data_param {
     source: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/train_lmdb"
     batch_size:256
-    backend: LMDB
-  }
-}
-layer {
-  name: "data"
-  type: "Data"
-  top: "data"
-  top: "label"
-  include {
-    phase: TEST
-  }
-  transform_param {
-    scale: 1
-  }
-  data_param {
-    source: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/test_lmdb"
-    batch_size: 256
     backend: LMDB
   }
 }
@@ -137,20 +124,8 @@ layer {
   }
 }
 layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
+  name: "prob"
+  type: "Softmax"
   bottom: "fc4"
-  bottom: "label"
-  top: "loss"
+  top: "prob"
 }
-layer {
-  name: "accuracy"
-  type: "Accuracy"
-  bottom: "fc4"
-  bottom: "label"
-  top: "accuracy"
-  include {
-    phase: TEST
-  }
-}
-
