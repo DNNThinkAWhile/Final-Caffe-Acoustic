@@ -26,7 +26,7 @@ def main(argv):
 
 
     #input : iterable : (H x W x K)
-    (spids, xs)  = read_data(INPUT_FILE, count=10000)
+    (spids, xs)  = read_data(INPUT_FILE, count=20000)
     ys = [int(spchid_phone_map[spid]) for spid in spids]
     sum_pred = 0
     sum_correct = 0
@@ -65,26 +65,6 @@ def read_data(in_file, count=-1):
         xs.append(np.array(x).reshape((1,FEAT_NUM,1)))
 
     return spids, xs
-
-def read_data2(in_file, count=-1):
-    lines = []
-    with open(in_file, 'r') as f:
-        if count < 0:
-            lines = f.readlines()
-        else:
-            for i in xrange(count):
-                lines.append(f.readline())
-    xs = []
-    spids = []
-    for i, l in enumerate(lines):
-        l = l.strip().split()
-        x = [float(ft) for ft in l[1:]]
-        spids.append(l[0])
-        if i > 0 and i % BATCH:
-            xs.append(np.array(x).reshape((1,FEAT_NUM,1)))
-
-    return spids, xs
-
 
 
 
