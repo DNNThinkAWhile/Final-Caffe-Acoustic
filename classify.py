@@ -1,11 +1,10 @@
 import numpy as np
 import caffe
 import sys
-from prepare_data import Datum
 import prepare_data
 
-MODEL_FILE = 'acoustic_predict.prototxt'
-PRETRAINED = '_iter_180000.caffemodel'
+MODEL_FILE = 'acoustic_predict_hdf5.prototxt'
+PRETRAINED = '_iter_10000.caffemodel'
 FEAT_NUM = 69 + 39
 INPUT_FILE = 'MLDS_HW1_RELEASE_v1/mfccfbank/train.normalized.cv.test.ark'
 BATCH = 256
@@ -13,17 +12,21 @@ LABEL_FILE = 'MLDS_HW1_RELEASE_v1/label/train.lab'
 MAP_FILE = 'MLDS_HW1_RELEASE_v1/phones/48_idx_chr.map'
 
 def main(argv):
-    print 'start!!!'
+
+    if len(argv) < 2:
+        print 'classify.py _iter_10000.caffemodel'
+        exit(-1)
+    pretrained = argv[1]
 
     spchid_phone_map, d_index_phone, d_phone_index, d_phone_alphabet  = prepare_data.read_map(LABEL_FILE, MAP_FILE)
-    
-    caffe.set_mode_gpu()
-    net = caffe.Classifier(MODEL_FILE, PRETRAINED,raw_scale=1, image_dims=(1, FEAT_NUM))
 
-    
-    
+    caffe.set_mode_gpu()
+    net = caffe.Classifier(MODEL_FILE, pretrained,raw_scale=1, image_dims=(1, FEAT_NUM))
+
+
+
     #input : iterable : (H x W x K)
-    (spids, xs)  = read_data(INPUT_FILE, count=2048)
+    (spids, xs)  = read_data(INPUT_FILE, count=10000)
     ys = [int(spchid_phone_map[spid]) for spid in spids]
     sum_pred = 0
     sum_correct = 0
@@ -43,7 +46,7 @@ def main(argv):
     print 'predicted:', sum_pred
     print 'correct:', sum_correct
     print 'acc:', float(sum_correct) / float(sum_pred)
-    
+
 
 def read_data(in_file, count=-1):
     lines = []
@@ -60,6 +63,26 @@ def read_data(in_file, count=-1):
         x = [float(ft) for ft in l[1:]]
         spids.append(l[0])
         xs.append(np.array(x).reshape((1,FEAT_NUM,1)))
+
+    return spids, xs
+
+def read_data2(in_file, count=-1):
+    lines = []
+    with open(in_file, 'r') as f:
+        if count < 0:
+            lines = f.readlines()
+        else:
+            for i in xrange(count):
+                lines.append(f.readline())
+    xs = []
+    spids = []
+    for i, l in enumerate(lines):
+        l = l.strip().split()
+        x = [float(ft) for ft in l[1:]]
+        spids.append(l[0])
+        if i > 0 and i % BATCH:
+            xs.append(np.array(x).reshape((1,FEAT_NUM,1)))
+
     return spids, xs
 
 

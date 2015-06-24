@@ -1,9 +1,30 @@
 name: "Acoustic"
-input: "data"
-input_dim: 256
-input_dim: 1
-input_dim: 1
-input_dim: 108
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+    source: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/train.txt"
+    batch_size: 256
+  }
+}
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  hdf5_data_param {
+    source: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/test.txt"
+    batch_size: 256
+  }
+}
 layer {
   name: "fc1"
   type: "InnerProduct"
@@ -11,9 +32,11 @@ layer {
   top: "fc1"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -48,9 +71,11 @@ layer {
   top: "fc2"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -85,9 +110,11 @@ layer {
   top: "fc3"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -122,9 +149,11 @@ layer {
   top: "fc4"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -159,9 +188,11 @@ layer {
   top: "fc5"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 48
@@ -175,9 +206,19 @@ layer {
   }
 }
 layer {
-  name: "prob"
-  type: "Softmax"
-  bottom: "fc4"
-  top: "prob"
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "fc5"
+  bottom: "label"
+  top: "loss"
 }
-
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "fc5"
+  bottom: "label"
+  top: "accuracy"
+  #include {
+  #  phase: TEST
+  #}
+}

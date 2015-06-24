@@ -15,6 +15,7 @@ layer {
     source: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/train_lmdb"
     batch_size:256
     backend: LMDB
+    scale: 1
   }
 }
 layer {
@@ -32,6 +33,7 @@ layer {
     source: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/test_lmdb"
     batch_size: 256
     backend: LMDB
+    scale: 1
   }
 }
 layer {
@@ -41,9 +43,11 @@ layer {
   top: "fc1"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -52,25 +56,37 @@ layer {
     }
     bias_filler {
       type: "constant"
+      value: 0
     }
   }
 }
 layer {
-  name: "sigmoid1"
+  name: "relu1"
   bottom: "fc1"
-  top: "sig1"
-  type: "Sigmoid"
+  top: "fc1"
+  type: "ReLU"
 }
+# layer {
+#   name: "drop1"
+#   type: "Dropout"
+#   bottom: "fc1"
+#   top: "fc1"
+#   dropout_param {
+#     dropout_ratio: 0.5
+#   }
+# }
 layer {
   name: "fc2"
   type: "InnerProduct"
-  bottom: "sig1"
+  bottom: "fc1"
   top: "fc2"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -79,25 +95,37 @@ layer {
     }
     bias_filler {
       type: "constant"
+      value: 0
     }
   }
 }
 layer {
-  name: "sigmoid2"
+  name: "relu2"
   bottom: "fc2"
-  top: "sig2"
-  type: "Sigmoid"
+  top: "fc2"
+  type: "ReLU"
 }
+# layer {
+#   name: "drop2"
+#   type: "Dropout"
+#   bottom: "fc2"
+#   top: "fc2"
+#   dropout_param {
+#     dropout_ratio: 0.5
+#   }
+# }
 layer {
   name: "fc3"
   type: "InnerProduct"
-  bottom: "sig2"
+  bottom: "fc2"
   top: "fc3"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 1024
@@ -106,25 +134,76 @@ layer {
     }
     bias_filler {
       type: "constant"
+      value: 0
     }
   }
 }
 layer {
-  name: "sigmoid3"
+  name: "relu3"
   bottom: "fc3"
-  top: "sig3"
-  type: "Sigmoid"
+  top: "fc3"
+  type: "ReLU"
 }
+# layer {
+#   name: "drop3"
+#   type: "Dropout"
+#   bottom: "fc3"
+#   top: "fc3"
+#   dropout_param {
+#     dropout_ratio: 0.5
+#   }
+# }
 layer {
   name: "fc4"
   type: "InnerProduct"
-  bottom: "sig3"
+  bottom: "fc3"
   top: "fc4"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1024
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu4"
+  bottom: "fc4"
+  top: "fc4"
+  type: "ReLU"
+}
+# layer {
+#   name: "drop4"
+#   type: "Dropout"
+#   bottom: "fc4"
+#   top: "fc4"
+#   dropout_param {
+#     dropout_ratio: 0.5
+#   }
+# }
+layer {
+  name: "fc5"
+  type: "InnerProduct"
+  bottom: "fc4"
+  top: "fc5"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
     num_output: 48
@@ -133,24 +212,24 @@ layer {
     }
     bias_filler {
       type: "constant"
+      value: 0
     }
   }
 }
 layer {
   name: "loss"
   type: "SoftmaxWithLoss"
-  bottom: "fc4"
+  bottom: "fc5"
   bottom: "label"
   top: "loss"
 }
 layer {
   name: "accuracy"
   type: "Accuracy"
-  bottom: "fc4"
+  bottom: "fc5"
   bottom: "label"
   top: "accuracy"
-  include {
-    phase: TEST
-  }
+  #include {
+  #  phase: TEST
+  #}
 }
-

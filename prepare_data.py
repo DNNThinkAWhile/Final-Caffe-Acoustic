@@ -2,29 +2,52 @@ import lmdb
 import numpy as np
 import caffe
 import sys
+import random
+import h5py
 
 MAP_FILE = 'MLDS_HW1_RELEASE_v1/phones/48_idx_chr.map'
 
 class Datum:
-    def __init__(self, spchid='', x=np.array([]), y=-1):
+    def __init__(self, spchid='', x=[], y=-1):
         self.spchid = spchid
         self.x = x
         self.y = y
 
 def main(argv):
-    if len(argv) < 4:
-        print 'cmd: prepare_data.py train.ark train.lab mylmdb'
+    if len(argv) < 6:
+        print 'cmd: prepare_data.py train.ark train.lab <dbName> <doShuffle? 1/0> <hdf5? 1 / 0>'
         exit(-1)
 
-    filein = argv[1]
-    dbname = argv[3]
-    label_file = argv[2]
-  
-  
+    (filein, label_file, dbname, do_shuffle, hdf5) \
+            = parse_args(argv)
+
+
     spchid_phone_map, d_index_phone, d_phone_index, d_phone_alphabet  = read_map(label_file, MAP_FILE)
-    
+
     data = read_data(filein, spchid_phone_map)
-    write_db(data, dbname)
+
+    if do_shuffle == 1:
+        random.shuffle(data)
+
+    if hdf5 == 0:
+        write_db(data, dbname)
+    elif hdf5 == 1:
+        write_hdf5(data, dbname)
+
+def parse_args(argv):
+    filein = argv[1]
+    label_file = argv[2]
+    dbname = argv[3]
+    do_shuffle = int(argv[4])
+    hdf5 = int(argv[5])
+
+    if do_shuffle not in [0, 1]:
+        print 'doShuffle should be 0 or 1'
+        exit(-1)
+    if hdf5 not in [0, 1]:
+        print 'hdf5 should be 0 or 1'
+        exit(-1)
+    return filein, label_file, dbname, do_shuffle, hdf5
 
 def read_map(file_label, file_48_idx):
     d_speechid_index = {}
@@ -51,11 +74,11 @@ def read_map(file_label, file_48_idx):
 
 def read_data(fn, spchid_phone_map):
     FEAT_CNT = 69 + 39
-    
-    k = 1     # channels 
+
+    k = 1     # channels
     h = 1
     w = FEAT_CNT
-    
+
     #x = np.zeros((n, k, h, w), type=np.float32)
     #y = np.zeros(n, dtype=np.int64)
     xs = []
@@ -73,7 +96,7 @@ def read_data(fn, spchid_phone_map):
 
 def parseline(line_str):
     l = line_str.strip().split()
-    x = np.array([float(feat) for feat in l[1:]], dtype=np.float32)
+    x = [float(feat) for feat in l[1:]]
     spchid = l[0]
     return spchid, x
 
@@ -86,13 +109,27 @@ def write_db(data, db):
             str_id = mydatum.spchid
             txn.put(str_id, datum.SerializeToString())
 
+def write_hdf5(data, hdf_file):
+    ys = []
+    xs = []
+    for datum in data:
+        ys.append(datum.y)
+        xs.append(datum.x)
+    yarr = np.array(ys, dtype=np.float32)
+    xarr = np.array(xs, dtype=np.float32)
+
+    with h5py.File(hdf_file) as f:
+        f['data'] = xarr
+        f['label'] = yarr
+
+
 def build_datum(mydatum):
     datum = caffe.proto.caffe_pb2.Datum()
     datum.channels = 1
     datum.height = 1
     datum.width = len(mydatum.x)
     datum.label = mydatum.y
-    datum.data = mydatum.x.tobytes()
+    datum.data = np.array(mydatum.x, dtype=np.float32).tobytes()
     return datum
 
 

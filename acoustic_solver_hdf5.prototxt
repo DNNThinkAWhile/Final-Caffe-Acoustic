@@ -1,5 +1,5 @@
 # The train/test net protocol buffer definition
-net: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/acoustic_train_test.prototxt"
+net: "/tmp2/weitang114/tang/Final-Caffe-Acoustic/acoustic_train_test_hdf5.prototxt"
 # test_iter specifies how many forward passes the test should carry out.
 # 224965(cv test size) / 256 (batch)
 test_iter: 878
