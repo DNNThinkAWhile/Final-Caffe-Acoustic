@@ -177,7 +177,7 @@ layer {
 layer {
   name: "prob"
   type: "Softmax"
-  bottom: "fc4"
+  bottom: "fc5"
   top: "prob"
 }
 
