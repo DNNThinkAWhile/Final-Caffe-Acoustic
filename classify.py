@@ -3,7 +3,7 @@ import caffe
 import sys
 import prepare_data
 
-MODEL_FILE = 'acoustic_mini_predict.prototxt'
+MODEL_FILE = 'acoustic_predict_hdf5.prototxt'
 PRETRAINED = '_iter_10000.caffemodel'
 FEAT_NUM = 69 + 39
 INPUT_FILE = 'MLDS_HW1_RELEASE_v1/mfccfbank/train.normalized.cv.test.ark'
