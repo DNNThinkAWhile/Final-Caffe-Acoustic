@@ -3,7 +3,7 @@ import caffe
 import sys
 import prepare_data
 
-MODEL_FILE = 'acoustic_predict_hdf5.prototxt'
+MODEL_FILE = 'acoustic_mini_predict.prototxt'
 PRETRAINED = '_iter_10000.caffemodel'
 FEAT_NUM = 69 + 39
 INPUT_FILE = 'MLDS_HW1_RELEASE_v1/mfccfbank/train.normalized.cv.test.ark'
@@ -33,7 +33,11 @@ def main(argv):
     for i in xrange(len(ys) / BATCH):
         ys_part = ys[i*BATCH: i*BATCH + BATCH]
         xs_part = xs[i*BATCH: i*BATCH + BATCH]
-        pred = net.predict(xs_part)
+        pred = net.predict(xs_part, oversample=False)
+
+        # for (prob, y) in zip(pred, ys_part):
+        #     print y, prob
+
         #print 'prediction shape:', pred[0].shape
         #print 'pred class:', pred[0].argmax()
         sum_pred += BATCH
