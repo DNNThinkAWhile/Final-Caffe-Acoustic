@@ -73,12 +73,6 @@ def read_map(file_label, file_48_idx):
 
 
 def read_data(fn, spchid_phone_map):
-    FEAT_CNT = 69 + 39
-
-    k = 1     # channels
-    h = 1
-    w = FEAT_CNT
-
     #x = np.zeros((n, k, h, w), type=np.float32)
     #y = np.zeros(n, dtype=np.int64)
     xs = []
