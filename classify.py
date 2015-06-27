@@ -13,20 +13,21 @@ MAP_FILE = 'MLDS_HW1_RELEASE_v1/phones/48_idx_chr.map'
 
 def main(argv):
 
-    if len(argv) < 2:
-        print 'classify.py _iter_10000.caffemodel'
+    if len(argv) < 3:
+        print 'classify.py predict.prototxt _iter_10000.caffemodel'
         exit(-1)
-    pretrained = argv[1]
+    model_file = argv[1]
+    pretrained = argv[2]
 
     spchid_phone_map, d_index_phone, d_phone_index, d_phone_alphabet  = prepare_data.read_map(LABEL_FILE, MAP_FILE)
 
     caffe.set_mode_gpu()
-    net = caffe.Classifier(MODEL_FILE, pretrained,raw_scale=1, image_dims=(1, FEAT_NUM))
+    net = caffe.Classifier(model_file, pretrained,raw_scale=1, image_dims=(1, FEAT_NUM))
 
 
 
     #input : iterable : (H x W x K)
-    (spids, xs)  = read_data(INPUT_FILE, count=20000)
+    (spids, xs)  = read_data(INPUT_FILE, count=8192)
     ys = [int(spchid_phone_map[spid]) for spid in spids]
     sum_pred = 0
     sum_correct = 0
